@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import WalletModal from "../components/WalletModal";
+import { loadContent, saveContent } from "../lib/content";
+import type { UserAccount } from "../lib/content";
 
 const COUNTRIES = ["France", "Belgique", "Suisse", "Canada", "Espagne", "Italie", "Allemagne", "Royaume-Uni", "Maroc", "Tunisie", "Sénégal", "Côte d'Ivoire", "Cameroun", "Portugal", "Pays-Bas", "Autre"];
 const CASE_TYPES = ["Recouvrement de fonds crypto", "Obtention d'une licence boursière", "Trading & accès marchés", "Investissement & gestion d'actifs", "Compliance & audit réglementaire"];
@@ -52,6 +54,56 @@ export default function Register() {
   const canNext2 = form.phone && form.email && form.caseType;
 
   const handleSubmit = () => {
+    const content = loadContent();
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+
+    // Generate unique client ID
+    const countryCode = (form.country || "XX").slice(0, 2).toUpperCase();
+    const num = String(Math.floor(100000 + Math.random() * 900000));
+    const existingCount = content.users.length + 1;
+    const clientId = `CB-${countryCode}${num.slice(0, 3)}${String(existingCount).padStart(3, "0")}`;
+
+    const flagMap: Record<string, string> = {
+      "France": "🇫🇷", "Belgique": "🇧🇪", "Suisse": "🇨🇭", "Canada": "🇨🇦",
+      "Espagne": "🇪🇸", "Italie": "🇮🇹", "Allemagne": "🇩🇪", "Royaume-Uni": "🇬🇧",
+      "Maroc": "🇲🇦", "Tunisie": "🇹🇳", "Sénégal": "🇸🇳", "Côte d'Ivoire": "🇨🇮",
+      "Cameroun": "🇨🇲", "Portugal": "🇵🇹", "Pays-Bas": "🇳🇱", "Autre": "🌍",
+    };
+
+    const planMap: Record<string, UserAccount["plan"]> = {
+      "Essentiel": "Professionnel", "Standard": "Professionnel",
+      "Professionnel": "Professionnel", "VIP Institutionnel": "VIP Institutionnel",
+    };
+
+    const newUser: UserAccount = {
+      id: `u_${Date.now()}`,
+      clientId,
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      phone: form.phone,
+      country: form.country || "Autre",
+      flag: flagMap[form.country] || "🌍",
+      plan: planMap[form.plan] || "Professionnel",
+      status: "pending",
+      kyc: "0",
+      joinDate: dateStr,
+      lastSeen: "À l'instant",
+      balance: 0,
+      fundsAdded: 0,
+      fundsWithdrawn: 0,
+      pnl: 0,
+      caseStatus: "open",
+      caseAmount: 0,
+      caseRef: `${countryCode}-${now.getFullYear()}-${num.slice(0, 4)}`,
+      procedureStep: 1,
+      notes: `Type de dossier: ${form.caseType}. Plan choisi: ${form.plan}. Paiement: ${form.payment}.`,
+      comments: [],
+      assignedAdvisor: "",
+    };
+
+    saveContent({ ...content, users: [...content.users, newUser] });
     setSuccess(true);
     setTimeout(() => navigate("/dashboard"), 2200);
   };
