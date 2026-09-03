@@ -26,11 +26,13 @@ export default function Login() {
     try {
       const { error: err } = await auth.signIn(email, password);
       if (err) {
-        setError(
-          err.message.includes("Invalid login")
-            ? "Email ou mot de passe incorrect."
-            : err.message
-        );
+        if (err.message.includes("Invalid login") || err.message.includes("invalid_credentials")) {
+          setError("Email ou mot de passe incorrect.");
+        } else if (err.message.includes("Email not confirmed")) {
+          setError("Votre email n'est pas confirmé. Vérifiez votre boîte mail ou demandez un renvoi.");
+        } else {
+          setError(err.message);
+        }
       } else {
         navigate("/dashboard");
       }
