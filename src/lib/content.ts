@@ -334,12 +334,52 @@ export function loadContent(): SiteContent {
   }
 }
 
-export function saveContent(content: SiteContent): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
-  window.dispatchEvent(new Event("cb-content-updated"));
+import { db } from "./supabaseClient";
+
+// ── Merge helper ──────────────────────────────────────────────────────────────
+function mergeContent(p: Partial<SiteContent>): SiteContent {
+  return {
+    ...DEFAULT_CONTENT,
+    ...p,
+    users: (p.users ?? DEFAULT_USERS).map((u: UserAccount) => ({
+      ...u,
+      clientId: u.clientId || "",
+      firstName: u.firstName || "",
+      lastName: u.lastName || "",
+      phone: u.phone || "",
+      comments: u.comments || [],
+      assignedAdvisor: u.assignedAdvisor || "",
+    })),
+    staff: p.staff ?? DEFAULT_STAFF,
+    companyStructure: { ...DEFAULT_CONTENT.companyStructure, ...(p.companyStructure ?? {}) },
+    floatCards: p.floatCards ?? DEFAULT_CONTENT.floatCards,
+    branding: { ...DEFAULT_CONTENT.branding, ...(p.branding ?? {}) },
+  };
 }
 
-export function resetContent(): void {
+// ── Sync Supabase → localStorage ──────────────────────────────────────────────
+export async function syncFromSupabase(): Promise<SiteContent> {
+  try {
+    const remote = await db.getContent() as Partial<SiteContent> | null;
+    if (remote && Object.keys(remote).length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+      window.dispatchEvent(new Event("cb-content-updated"));
+      return mergeContent(remote);
+    }
+  } catch { /* fall through */ }
+  return loadContent();
+}
+
+export async function saveContent(content: SiteContent): Promise<void> {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
+  window.dispatchEvent(new Event("cb-content-updated"));
+  try {
+    await db.putContent(content as unknown as object);
+  } catch { /* localStorage saved, Supabase best-effort */ }
+}
+
+export async function resetContent(): Promise<void> {
   localStorage.removeItem(STORAGE_KEY);
   window.dispatchEvent(new Event("cb-content-updated"));
+  await db.putContent(DEFAULT_CONTENT as unknown as object).catch(() => {});
 }
