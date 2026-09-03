@@ -108,36 +108,44 @@ function Stat({ icon, label, value, sub, color = P.emerald }: { icon: string; la
 }
 
 // ── tabs ──────────────────────────────────────────────────────────────────────
-function TabOverview() {
-  const portfolioData = genHistory(87340);
-  const weekData = [
-    { day: "Lun", val: 81200 }, { day: "Mar", val: 83400 }, { day: "Mer", val: 80100 },
-    { day: "Jeu", val: 84900 }, { day: "Ven", val: 86200 }, { day: "Sam", val: 85400 },
-    { day: "Dim", val: 87340 },
-  ];
+function TabOverview({ onNavigate }: { onNavigate: (tab: string) => void }) {
+  const userName = sessionStorage.getItem("cb_user_name") || "Jean Dupont";
+  const isNewClient = !!sessionStorage.getItem("cb_user_id") && !sessionStorage.getItem("cb_user_id")?.startsWith("u1");
+  const balance = isNewClient ? 0 : 87340;
+  const caseAmount = isNewClient ? 0 : 48200;
+
+  const portfolioData = genHistory(balance || 100);
+  const weekData = isNewClient
+    ? [{ day: "Lun", val: 0 }, { day: "Mar", val: 0 }, { day: "Mer", val: 0 }, { day: "Jeu", val: 0 }, { day: "Ven", val: 0 }, { day: "Sam", val: 0 }, { day: "Dim", val: 0 }]
+    : [{ day: "Lun", val: 81200 }, { day: "Mar", val: 83400 }, { day: "Mer", val: 80100 }, { day: "Jeu", val: 84900 }, { day: "Ven", val: 86200 }, { day: "Sam", val: 85400 }, { day: "Dim", val: 87340 }];
+
   const timeline = [
     { label: "Dossier Ouvert", done: true },
-    { label: "Forensics", done: true },
-    { label: "Procédure Légale", done: false, active: true },
+    { label: "Forensics", done: !isNewClient },
+    { label: "Procédure Légale", done: false, active: !isNewClient },
     { label: "Négociation", done: false },
     { label: "Recouvrement", done: false },
   ];
-  const activities = [
-    { icon: "✅", text: "Étape Forensics complétée", time: "2h", color: P.emerald },
-    { icon: "📋", text: "Rapport d'analyse on-chain reçu", time: "5h", color: P.blue },
-    { icon: "💬", text: "Message de Me. Leclerc", time: "1j", color: P.slate },
-    { icon: "🔒", text: "Connexion — Paris, France", time: "2j", color: P.slate },
-    { icon: "💰", text: "Paiement — Plan Professionnel", time: "3j", color: P.emerald },
-  ];
+  const activities = isNewClient
+    ? [
+        { icon: "✅", text: "Dossier ouvert — en attente d'un conseiller", time: "À l'instant", color: P.emerald },
+        { icon: "📋", text: "Inscription confirmée — dossier gratuit", time: "À l'instant", color: P.blue },
+      ]
+    : [
+        { icon: "✅", text: "Étape Forensics complétée", time: "2h", color: P.emerald },
+        { icon: "📋", text: "Rapport d'analyse on-chain reçu", time: "5h", color: P.blue },
+        { icon: "💬", text: "Message de Me. Leclerc", time: "1j", color: P.slate },
+        { icon: "🔒", text: "Connexion — Paris, France", time: "2j", color: P.slate },
+      ];
 
   return (
     <div className="space-y-5">
-      {/* Logo header */}
+      {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <CentralLogo size={40} darkBg={true} />
         <div>
           <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "#fff" }}>Tableau de Bord</p>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Bienvenue, Jean Dupont · Plan Professionnel</p>
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Bienvenue, {userName} · {isNewClient ? "Dossier en attente" : "Plan Professionnel"}</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <span className="w-2 h-2 rounded-full pulse-dot" style={{ background: P.emerald, display: "inline-block" }} />
@@ -145,12 +153,26 @@ function TabOverview() {
         </div>
       </div>
 
+      {/* New client banner */}
+      {isNewClient && (
+        <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: "rgba(59,130,246,0.1)", border: "1.5px solid rgba(59,130,246,0.25)" }}>
+          <span style={{ fontSize: 22, flexShrink: 0 }}>📋</span>
+          <div className="flex-1">
+            <p style={{ fontWeight: 700, color: "#fff", fontSize: 14 }}>Dossier ouvert — En attente d'activation</p>
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>Un conseiller Central Boursière va prendre contact avec vous dans les 24h pour activer votre procédure. L'inscription est <strong style={{ color: P.emerald }}>gratuite</strong>.</p>
+          </div>
+          <button onClick={() => onNavigate("chat")} className="px-3 py-1.5 rounded-lg text-xs font-bold shrink-0" style={{ background: P.blue, color: "#fff" }}>
+            Contacter →
+          </button>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Stat icon="📁" label="Statut Dossier" value="En cours" sub="Étape 3/5" color={P.blue} />
-        <Stat icon="💰" label="En Recouvrement" value="$48,200" sub="USDT · FR-0391" color={P.emerald} />
-        <Stat icon="📊" label="Portfolio" value="$87,340" sub="+12.4% ce mois" color={P.amber} />
-        <Stat icon="📋" label="Licences" value="1 / 3" sub="FCA active" color={P.violet} />
+        <Stat icon="📁" label="Statut Dossier" value={isNewClient ? "En attente" : "En cours"} sub={isNewClient ? "Activation requise" : "Étape 3/5"} color={P.blue} />
+        <Stat icon="💰" label="En Recouvrement" value={caseAmount > 0 ? `$${caseAmount.toLocaleString()}` : "$0"} sub={isNewClient ? "À définir" : "USDT · FR-0391"} color={P.emerald} />
+        <Stat icon="📊" label="Portfolio" value={balance > 0 ? `$${balance.toLocaleString()}` : "$0.00"} sub={isNewClient ? "Aucun dépôt" : "+12.4% ce mois"} color={P.amber} />
+        <Stat icon="📋" label="Licences" value={isNewClient ? "0 / 3" : "1 / 3"} sub={isNewClient ? "Non démarrées" : "FCA active"} color={P.violet} />
       </div>
 
       {/* Quick actions */}
@@ -161,8 +183,9 @@ function TabOverview() {
           { label: "Échanger", icon: "🔄", color: P.cyan, id: "exchange" },
           { label: "Bot Trader", icon: "🤖", color: P.violet, id: "bottrader" },
         ].map((a) => (
-          <button key={a.id} className="rounded-xl py-3 flex flex-col items-center gap-1 transition-all hover:scale-105"
-            style={{ background: a.color + "14", border: `1px solid ${a.color}30` }}>
+          <button key={a.id} onClick={() => onNavigate(a.id)}
+            className="rounded-xl py-3 flex flex-col items-center gap-1 transition-all hover:scale-105 active:scale-95"
+            style={{ background: a.color + "14", border: `1px solid ${a.color}30`, cursor: "pointer" }}>
             <span style={{ fontSize: 20 }}>{a.icon}</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: a.color }}>{a.label}</span>
           </button>
@@ -1212,7 +1235,7 @@ export default function Dashboard() {
   };
 
   const tabComponents: Record<string, React.ReactElement> = {
-    overview: <TabOverview />,
+    overview: <TabOverview onNavigate={setActiveTab} />,
     mycase: <TabMyCase />,
     livetrading: <TabLiveTrading />,
     buycrypto: <TabBuyCrypto />,
@@ -1323,7 +1346,7 @@ export default function Dashboard() {
 
         <div className="p-5 lg:p-6" style={{ maxWidth: 900, marginLeft: "auto", marginRight: "auto" }}>
           <div className="lg:ml-0" style={{ marginLeft: 0 }}>
-            {tabComponents[activeTab] ?? <TabOverview />}
+            {tabComponents[activeTab] ?? <TabOverview onNavigate={setActiveTab} />}
           </div>
         </div>
       </div>
