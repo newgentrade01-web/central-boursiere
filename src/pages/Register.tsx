@@ -63,6 +63,13 @@ export default function Register() {
         return;
       }
 
+      // Supabase email confirmation required → warn user
+      if (!data.session) {
+        setError("Un email de confirmation a été envoyé à " + form.email + ". Confirmez votre email puis connectez-vous.");
+        setSaving(false);
+        return;
+      }
+
       const now = new Date();
       const dateStr = now.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
       const countryCode = (form.country || "XX").slice(0, 2).toUpperCase();
