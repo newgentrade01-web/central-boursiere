@@ -303,43 +303,65 @@ export const DEFAULT_CONTENT: SiteContent = {
   staff: DEFAULT_STAFF,
 };
 
+import { db } from "./supabaseClient";
+
 const STORAGE_KEY = "cb_site_content";
 
+// ── Merge helper ──────────────────────────────────────────────────────────────
+function mergeContent(p: Partial<SiteContent>): SiteContent {
+  return {
+    ...DEFAULT_CONTENT,
+    ...p,
+    users: (p.users ?? DEFAULT_USERS).map((u: UserAccount) => ({
+      ...u,
+      clientId: u.clientId || "",
+      firstName: u.firstName || "",
+      lastName: u.lastName || "",
+      phone: u.phone || "",
+      comments: u.comments || [],
+      assignedAdvisor: u.assignedAdvisor || "",
+    })),
+    staff: p.staff ?? DEFAULT_STAFF,
+    companyStructure: { ...DEFAULT_CONTENT.companyStructure, ...(p.companyStructure ?? {}) },
+    floatCards: p.floatCards ?? DEFAULT_CONTENT.floatCards,
+    branding: { ...DEFAULT_CONTENT.branding, ...(p.branding ?? {}) },
+  };
+}
+
+// ── Sync Supabase → localStorage cache ───────────────────────────────────────
+export async function syncFromSupabase(): Promise<SiteContent> {
+  try {
+    const remote = await db.getContent() as Partial<SiteContent> | null;
+    if (remote) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+      window.dispatchEvent(new Event("cb-content-updated"));
+      return mergeContent(remote);
+    }
+  } catch { /* fall through to localStorage */ }
+  return loadContent();
+}
+
+// ── Load (synchronous, from localStorage cache) ───────────────────────────────
 export function loadContent(): SiteContent {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_CONTENT;
-    const p = JSON.parse(raw) as Partial<SiteContent>;
-    return {
-      ...DEFAULT_CONTENT,
-      ...p,
-      users: (p.users ?? DEFAULT_USERS).map((u: UserAccount) => {
-        return {
-          ...u,
-          clientId: u.clientId || "",
-          firstName: u.firstName || "",
-          lastName: u.lastName || "",
-          phone: u.phone || "",
-          comments: u.comments || [],
-          assignedAdvisor: u.assignedAdvisor || "",
-        };
-      }),
-      staff: p.staff ?? DEFAULT_STAFF,
-      companyStructure: { ...DEFAULT_CONTENT.companyStructure, ...(p.companyStructure ?? {}) },
-      floatCards: p.floatCards ?? DEFAULT_CONTENT.floatCards,
-      branding: { ...DEFAULT_CONTENT.branding, ...(p.branding ?? {}) },
-    };
+    return mergeContent(JSON.parse(raw) as Partial<SiteContent>);
   } catch {
     return DEFAULT_CONTENT;
   }
 }
 
+// ── Save (localStorage + async Supabase) ──────────────────────────────────────
 export function saveContent(content: SiteContent): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
   window.dispatchEvent(new Event("cb-content-updated"));
+  // async persist to Supabase (fire and forget)
+  db.putContent(content as unknown as object).catch(() => {});
 }
 
 export function resetContent(): void {
   localStorage.removeItem(STORAGE_KEY);
   window.dispatchEvent(new Event("cb-content-updated"));
+  db.putContent(DEFAULT_CONTENT as unknown as object).catch(() => {});
 }

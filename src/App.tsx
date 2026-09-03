@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { syncFromSupabase } from "./lib/content";
 import Navbar from "./components/Navbar";
 import Landing from "./pages/Landing";
 import Register from "./pages/Register";
@@ -28,6 +29,10 @@ function AppShell() {
 }
 
 export default function App() {
+  useEffect(() => {
+    syncFromSupabase();
+  }, []);
+
   return (
     <BrowserRouter>
       <AppShell />
