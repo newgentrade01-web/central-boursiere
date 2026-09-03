@@ -7,23 +7,6 @@ import type { UserAccount } from "../lib/content";
 const COUNTRIES = ["France", "Belgique", "Suisse", "Canada", "Espagne", "Italie", "Allemagne", "Royaume-Uni", "Maroc", "Tunisie", "Sénégal", "Côte d'Ivoire", "Cameroun", "Portugal", "Pays-Bas", "Autre"];
 const CASE_TYPES = ["Recouvrement de fonds crypto", "Obtention d'une licence boursière", "Trading & accès marchés", "Investissement & gestion d'actifs", "Compliance & audit réglementaire"];
 
-const PLANS = [
-  { name: "Essentiel", price: "$250", badge: null },
-  { name: "Standard", price: "$500", badge: null },
-  { name: "Professionnel", price: "$1,000", badge: "Plus populaire" },
-  { name: "VIP Institutionnel", price: "$5,000", badge: null },
-];
-
-const PAYMENT_METHODS = [
-  { id: "card", label: "Carte Visa / Mastercard", icon: "💳" },
-  { id: "sepa", label: "Virement SEPA", icon: "🏦" },
-  { id: "usdt", label: "USDT (TRC-20 / ERC-20)", icon: "₮" },
-  { id: "btc", label: "Bitcoin (BTC)", icon: "₿" },
-  { id: "eth", label: "Ethereum (ETH)", icon: "Ξ" },
-  { id: "paypal", label: "PayPal", icon: "🅿" },
-  { id: "apple", label: "Apple Pay / Google Pay", icon: "📱" },
-];
-
 interface FormData {
   firstName: string;
   lastName: string;
@@ -32,8 +15,6 @@ interface FormData {
   phone: string;
   email: string;
   caseType: string;
-  plan: string;
-  payment: string;
   wallet: string;
 }
 
@@ -42,10 +23,10 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [showWallet, setShowWallet] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormData>({
     firstName: "", lastName: "", country: "", password: "",
-    phone: "", email: "", caseType: "",
-    plan: "Professionnel", payment: "card", wallet: "",
+    phone: "", email: "", caseType: "", wallet: "",
   });
 
   const update = (k: keyof FormData, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -53,16 +34,11 @@ export default function Register() {
   const canNext1 = form.firstName && form.lastName && form.country && form.password.length >= 6;
   const canNext2 = form.phone && form.email && form.caseType;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setSaving(true);
     const content = loadContent();
     const now = new Date();
     const dateStr = now.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
-
-    // Generate unique client ID
-    const countryCode = (form.country || "XX").slice(0, 2).toUpperCase();
-    const num = String(Math.floor(100000 + Math.random() * 900000));
-    const existingCount = content.users.length + 1;
-    const clientId = `CB-${countryCode}${num.slice(0, 3)}${String(existingCount).padStart(3, "0")}`;
 
     const flagMap: Record<string, string> = {
       "France": "🇫🇷", "Belgique": "🇧🇪", "Suisse": "🇨🇭", "Canada": "🇨🇦",
@@ -71,13 +47,14 @@ export default function Register() {
       "Cameroun": "🇨🇲", "Portugal": "🇵🇹", "Pays-Bas": "🇳🇱", "Autre": "🌍",
     };
 
-    const planMap: Record<string, UserAccount["plan"]> = {
-      "Essentiel": "Professionnel", "Standard": "Professionnel",
-      "Professionnel": "Professionnel", "VIP Institutionnel": "VIP Institutionnel",
-    };
+    const countryCode = (form.country || "XX").slice(0, 2).toUpperCase();
+    const num = String(Math.floor(100000 + Math.random() * 900000));
+    const seq = String(content.users.length + 1).padStart(3, "0");
+    const clientId = `CB-${countryCode}${num.slice(0, 3)}${seq}`;
+    const userId = `u_${Date.now()}`;
 
     const newUser: UserAccount = {
-      id: `u_${Date.now()}`,
+      id: userId,
       clientId,
       firstName: form.firstName,
       lastName: form.lastName,
@@ -85,7 +62,7 @@ export default function Register() {
       phone: form.phone,
       country: form.country || "Autre",
       flag: flagMap[form.country] || "🌍",
-      plan: planMap[form.plan] || "Professionnel",
+      plan: "Professionnel",
       status: "pending",
       kyc: "0",
       joinDate: dateStr,
@@ -98,12 +75,20 @@ export default function Register() {
       caseAmount: 0,
       caseRef: `${countryCode}-${now.getFullYear()}-${num.slice(0, 4)}`,
       procedureStep: 1,
-      notes: `Type de dossier: ${form.caseType}. Plan choisi: ${form.plan}. Paiement: ${form.payment}.`,
+      notes: `Type de dossier: ${form.caseType}. Inscription gratuite — paiement à l'activation.`,
       comments: [],
       assignedAdvisor: "",
     };
 
-    saveContent({ ...content, users: [...content.users, newUser] });
+    // Save to content store + Supabase (await for persistence)
+    await saveContent({ ...content, users: [...content.users, newUser] });
+
+    // Store session for dashboard personalization
+    sessionStorage.setItem("cb_user_id", userId);
+    sessionStorage.setItem("cb_user_name", `${form.firstName} ${form.lastName}`);
+    sessionStorage.setItem("cb_user_email", form.email);
+
+    setSaving(false);
     setSuccess(true);
     setTimeout(() => navigate("/dashboard"), 2200);
   };
@@ -115,9 +100,6 @@ export default function Register() {
     color: "#0A1F12",
     fontFamily: "var(--font-body)",
   };
-  const focusRing = {
-    "--tw-ring-color": "#10C96A",
-  } as React.CSSProperties;
 
   if (success) {
     return (
@@ -126,10 +108,11 @@ export default function Register() {
           <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center text-4xl" style={{ background: "rgba(16,201,106,0.15)" }}>
             ✅
           </div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "#0A1F12", marginBottom: 12 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "#0A1F12", marginBottom: 8 }}>
             Dossier Ouvert avec Succès !
           </h2>
-          <p style={{ color: "#6b8a72", fontSize: 15 }}>Redirection vers votre dashboard…</p>
+          <p style={{ color: "#6b8a72", fontSize: 14, marginBottom: 6 }}>Votre dossier est <strong>gratuit</strong> — le paiement sera demandé à l'activation de la procédure.</p>
+          <p style={{ color: "#6b8a72", fontSize: 13 }}>Redirection vers votre dashboard…</p>
           <div className="mt-6 w-12 h-1.5 rounded-full mx-auto" style={{ background: "#10C96A", animation: "scan 2s ease forwards" }} />
         </div>
       </div>
@@ -139,9 +122,17 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-16" style={{ paddingTop: 80 }}>
       <div className="w-full max-w-lg">
+        {/* FREE badge */}
+        <div className="text-center mb-6">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold" style={{ background: "rgba(16,201,106,0.12)", color: "#0B4D2E", border: "1px solid rgba(16,201,106,0.25)" }}>
+            🆓 Ouverture de dossier 100% GRATUITE
+          </span>
+          <p className="mt-2 text-xs" style={{ color: "#6b8a72" }}>Aucun paiement requis — vous payez uniquement si vous activez une procédure</p>
+        </div>
+
         {/* Progress */}
         <div className="flex items-center gap-2 mb-8">
-          {[1, 2, 3].map((s) => (
+          {[1, 2].map((s) => (
             <div key={s} className="flex items-center gap-2 flex-1">
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all"
@@ -153,19 +144,19 @@ export default function Register() {
                 {step > s ? "✓" : s}
               </div>
               <span style={{ fontSize: 12, fontWeight: 500, color: step >= s ? "#0B4D2E" : "#6b8a72" }}>
-                {s === 1 ? "Identité" : s === 2 ? "Contact" : "Plan & Paiement"}
+                {s === 1 ? "Identité" : "Contact & Dossier"}
               </span>
-              {s < 3 && <div className="flex-1 h-px" style={{ background: step > s ? "#0B4D2E" : "rgba(11,77,46,0.15)" }} />}
+              {s < 2 && <div className="flex-1 h-px" style={{ background: step > s ? "#0B4D2E" : "rgba(11,77,46,0.15)" }} />}
             </div>
           ))}
         </div>
 
         <div className="glass-card rounded-2xl p-7" style={{ background: "#F8FBF9" }}>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: "#0A1F12", marginBottom: 6 }}>
-            {step === 1 ? "Ouvrir un Dossier" : step === 2 ? "Vos Coordonnées" : "Plan & Paiement"}
+            {step === 1 ? "Ouvrir un Dossier Gratuit" : "Vos Coordonnées"}
           </h1>
           <p style={{ fontSize: 13, color: "#6b8a72", marginBottom: 24 }}>
-            {step === 1 ? "Étape 1 / 3 — Informations personnelles" : step === 2 ? "Étape 2 / 3 — Contact & type de dossier" : "Étape 3 / 3 — Sélectionnez votre plan"}
+            {step === 1 ? "Étape 1 / 2 — Informations personnelles" : "Étape 2 / 2 — Contact & type de dossier"}
           </p>
 
           {step === 1 && (
@@ -219,45 +210,6 @@ export default function Register() {
                   {CASE_TYPES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-              <div className="flex gap-2">
-                <button className="btn-outline flex-1 py-3 rounded-xl text-sm" onClick={() => setStep(1)}>← Retour</button>
-                <button
-                  className="btn-primary flex-1 py-3 rounded-xl text-sm"
-                  disabled={!canNext2}
-                  style={{ opacity: canNext2 ? 1 : 0.5, cursor: canNext2 ? "pointer" : "not-allowed" }}
-                  onClick={() => setStep(3)}
-                >
-                  Continuer →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-5">
-              {/* Plan selection */}
-              <div>
-                <label className="block text-xs font-semibold mb-2" style={{ color: "#0B4D2E" }}>Sélectionner votre plan</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {PLANS.map((p) => (
-                    <button
-                      key={p.name}
-                      onClick={() => update("plan", p.name)}
-                      className="rounded-xl p-3 text-left transition-all"
-                      style={{
-                        border: `2px solid ${form.plan === p.name ? "#0B4D2E" : "rgba(11,77,46,0.15)"}`,
-                        background: form.plan === p.name ? "rgba(11,77,46,0.06)" : "#fff",
-                      }}
-                    >
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#0A1F12" }}>{p.name}</div>
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "#0B4D2E" }}>{p.price}</div>
-                      {p.badge && <div className="mt-1 text-xs font-semibold" style={{ color: "#10C96A" }}>★ {p.badge}</div>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Connect wallet */}
               <div>
                 <label className="block text-xs font-semibold mb-2" style={{ color: "#0B4D2E" }}>Connecter un Wallet (optionnel)</label>
                 {form.wallet ? (
@@ -272,53 +224,21 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Payment method */}
-              <div>
-                <label className="block text-xs font-semibold mb-2" style={{ color: "#0B4D2E" }}>Méthode de paiement</label>
-                <div className="space-y-2">
-                  {PAYMENT_METHODS.map((m) => (
-                    <label key={m.id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer" style={{ border: `1.5px solid ${form.payment === m.id ? "#0B4D2E" : "rgba(11,77,46,0.15)"}`, background: form.payment === m.id ? "rgba(11,77,46,0.05)" : "#fff" }}>
-                      <input type="radio" name="payment" value={m.id} checked={form.payment === m.id} onChange={() => update("payment", m.id)} className="accent-green-800" />
-                      <span>{m.icon}</span>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: "#0A1F12" }}>{m.label}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {form.payment === "card" && (
-                  <div className="mt-3 space-y-2 p-4 rounded-xl" style={{ background: "#fff", border: "1px solid rgba(11,77,46,0.1)" }}>
-                    <input className={inputClass} style={inputStyle} placeholder="Numéro de carte" />
-                    <div className="grid grid-cols-2 gap-2">
-                      <input className={inputClass} style={inputStyle} placeholder="MM / AA" />
-                      <input className={inputClass} style={inputStyle} placeholder="CVV" />
-                    </div>
-                    <p className="text-xs mt-1" style={{ color: "#10C96A" }}>🔒 256-bit SSL · PCI DSS Compliant</p>
-                  </div>
-                )}
-                {form.payment === "sepa" && (
-                  <div className="mt-3 space-y-2 p-4 rounded-xl" style={{ background: "#fff", border: "1px solid rgba(11,77,46,0.1)" }}>
-                    <input className={inputClass} style={inputStyle} placeholder="IBAN (FR76 3000 6000 0112…)" />
-                    <input className={inputClass} style={inputStyle} placeholder="BIC / SWIFT" />
-                    <p className="text-xs mt-1" style={{ color: "#10C96A" }}>🔒 Virement sécurisé · SEPA Instant</p>
-                  </div>
-                )}
-                {["usdt", "btc", "eth"].includes(form.payment) && (
-                  <div className="mt-3 p-4 rounded-xl text-center" style={{ background: "#fff", border: "1px solid rgba(11,77,46,0.1)" }}>
-                    <div className="w-24 h-24 mx-auto mb-2 rounded-lg flex items-center justify-center text-4xl" style={{ background: "rgba(11,77,46,0.06)" }}>
-                      {form.payment === "usdt" ? "₮" : form.payment === "btc" ? "₿" : "Ξ"}
-                    </div>
-                    <p style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#0B4D2E", wordBreak: "break-all" }}>
-                      {form.payment === "usdt" ? "TRC-20: TXYZ1234abcdef5678901234567890cb" : form.payment === "btc" ? "1CentralBoursiere9xMpL7FmD4HVkqXZ" : "0xcb1234abcdef5678901234567890centralb"}
-                    </p>
-                    <p className="text-xs mt-1" style={{ color: "#10C96A" }}>🔒 Adresse vérifiée · SSL 256-bit</p>
-                  </div>
-                )}
+              {/* Free info box */}
+              <div className="rounded-xl p-3" style={{ background: "rgba(16,201,106,0.07)", border: "1px solid rgba(16,201,106,0.2)" }}>
+                <p style={{ fontSize: 12, color: "#0B4D2E", fontWeight: 600 }}>🆓 Inscription gratuite</p>
+                <p style={{ fontSize: 11, color: "#6b8a72", marginTop: 2 }}>Votre dossier sera ouvert immédiatement. Un conseiller vous contactera pour activer la procédure et discuter des options de paiement.</p>
               </div>
 
               <div className="flex gap-2">
-                <button className="btn-outline flex-1 py-3 rounded-xl text-sm" onClick={() => setStep(2)}>← Retour</button>
-                <button className="btn-primary flex-1 py-3 rounded-xl text-sm" onClick={handleSubmit}>
-                  Confirmer &amp; Ouvrir →
+                <button className="btn-outline flex-1 py-3 rounded-xl text-sm" onClick={() => setStep(1)}>← Retour</button>
+                <button
+                  className="btn-primary flex-1 py-3 rounded-xl text-sm"
+                  disabled={!canNext2 || saving}
+                  style={{ opacity: (canNext2 && !saving) ? 1 : 0.5, cursor: (canNext2 && !saving) ? "pointer" : "not-allowed" }}
+                  onClick={handleSubmit}
+                >
+                  {saving ? "Enregistrement…" : "Ouvrir mon Dossier →"}
                 </button>
               </div>
             </div>
