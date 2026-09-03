@@ -6,6 +6,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import WalletModal from "../components/WalletModal";
 import CentralLogo from "../components/CentralLogo";
+import { useAuth } from "../context/AuthContext";
+import { auth } from "../lib/supabaseClient";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 const genHistory = (base: number, n = 30) =>
@@ -108,11 +110,11 @@ function Stat({ icon, label, value, sub, color = P.emerald }: { icon: string; la
 }
 
 // ── tabs ──────────────────────────────────────────────────────────────────────
-function TabOverview({ onNavigate }: { onNavigate: (tab: string) => void }) {
-  const userName = sessionStorage.getItem("cb_user_name") || "Jean Dupont";
-  const isNewClient = !!sessionStorage.getItem("cb_user_id") && !sessionStorage.getItem("cb_user_id")?.startsWith("u1");
-  const balance = isNewClient ? 0 : 87340;
-  const caseAmount = isNewClient ? 0 : 48200;
+function TabOverview({ onNavigate, userProfile }: { onNavigate: (tab: string) => void; userProfile?: { firstName?: string; lastName?: string; balance?: number; caseAmount?: number; procedureStep?: number; caseRef?: string; status?: string } | null }) {
+  const userName = userProfile ? `${userProfile.firstName ?? ""} ${userProfile.lastName ?? ""}`.trim() || "Client" : "Client";
+  const isNewClient = !userProfile || (userProfile.balance ?? 0) === 0;
+  const balance = userProfile?.balance ?? 0;
+  const caseAmount = userProfile?.caseAmount ?? 0;
 
   const portfolioData = genHistory(balance || 100);
   const weekData = isNewClient
@@ -220,7 +222,7 @@ function TabOverview({ onNavigate }: { onNavigate: (tab: string) => void }) {
 
       {/* Case timeline */}
       <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "#fff", marginBottom: 14 }}>Dossier #FR-2026-0391</p>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "#fff", marginBottom: 14 }}>Dossier #{userProfile?.caseRef ?? "—"}</p>
         <div className="flex items-center flex-wrap gap-0">
           {timeline.map((t, i) => (
             <div key={t.label} className="flex items-center flex-1 min-w-0">
@@ -1228,14 +1230,20 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
 
-  const handleLogout = () => {
+  const displayName = profile
+    ? `${profile.firstName} ${profile.lastName}`.trim()
+    : user?.email ?? "Client";
+
+  const handleLogout = async () => {
     setSidebarOpen(false);
-    navigate("/");
+    await auth.signOut();
+    navigate("/login");
   };
 
   const tabComponents: Record<string, React.ReactElement> = {
-    overview: <TabOverview onNavigate={setActiveTab} />,
+    overview: <TabOverview onNavigate={setActiveTab} userProfile={profile} />,
     mycase: <TabMyCase />,
     livetrading: <TabLiveTrading />,
     buycrypto: <TabBuyCrypto />,
@@ -1335,6 +1343,9 @@ export default function Dashboard() {
           <span style={{ fontSize: 16, marginLeft: 4 }}>{activeItem?.icon}</span>
           <p style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 700, color: "#fff" }}>{activeItem?.label}</p>
           <div className="ml-auto flex items-center gap-3">
+            <span className="hidden sm:block text-xs px-3 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}>
+              {displayName}
+            </span>
             <button onClick={() => setActiveTab("chat")} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: P.emerald + "15", color: P.emerald }}>
               💬 Support
             </button>
@@ -1346,7 +1357,7 @@ export default function Dashboard() {
 
         <div className="p-5 lg:p-6" style={{ maxWidth: 900, marginLeft: "auto", marginRight: "auto" }}>
           <div className="lg:ml-0" style={{ marginLeft: 0 }}>
-            {tabComponents[activeTab] ?? <TabOverview onNavigate={setActiveTab} />}
+            {tabComponents[activeTab] ?? <TabOverview onNavigate={setActiveTab} userProfile={profile} />}
           </div>
         </div>
       </div>
