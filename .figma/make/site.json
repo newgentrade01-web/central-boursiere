@@ -1,0 +1,11 @@
+{
+  "title": "CentralBoursiere",
+  "description": "This web application generates high-quality content tailored to user specifications, enhancing productivity for writers, marketers, and businesses.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
