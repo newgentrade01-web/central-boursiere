@@ -6,6 +6,7 @@ import {
   loadContent, saveContent, resetContent,
   SiteContent, UserAccount, UserComment, StaffMember, FloatCard,
 } from "../lib/content";
+import { profiles } from "../lib/supabaseClient";
 import {
   checkPassword, createSession, getSession, clearSession,
   isLocked, lockoutRemaining, recordFailedAttempt, clearAttempts,
@@ -1448,6 +1449,21 @@ export default function Admin() {
     window.addEventListener("cb-content-updated", handler);
     return () => window.removeEventListener("cb-content-updated", handler);
   }, []);
+
+  // Sync real Supabase Auth registrations into admin users list
+  useEffect(() => {
+    if (!session) return;
+    profiles.getAll().then((all) => {
+      const remoteUsers = Object.values(all) as UserAccount[];
+      if (remoteUsers.length === 0) return;
+      setContent((prev) => {
+        const existingEmails = new Set(prev.users.map((u) => u.email));
+        const newUsers = remoteUsers.filter((u) => !existingEmails.has(u.email));
+        if (newUsers.length === 0) return prev;
+        return { ...prev, users: [...prev.users, ...newUsers] };
+      });
+    }).catch(() => {});
+  }, [session]);
 
   // Refresh session every 60s to detect expiry
   useEffect(() => {
