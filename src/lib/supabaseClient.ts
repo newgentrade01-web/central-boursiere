@@ -6,29 +6,28 @@ export const supabase = createClient(
   publicAnonKey,
 );
 
-const BASE = `https://${projectId}.supabase.co/functions/v1/server/make-server-27283c63`;
+const TABLE = "kv_store_27283c63";
 
-async function api<T>(path: string, method = "GET", body?: unknown): Promise<T | null> {
-  try {
-    const res = await fetch(`${BASE}${path}`, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) return null;
-    return res.json() as Promise<T>;
-  } catch {
-    return null;
-  }
+async function kvGet(key: string): Promise<unknown> {
+  const { data } = await supabase
+    .from(TABLE)
+    .select("value")
+    .eq("key", key)
+    .maybeSingle();
+  return data?.value ?? null;
+}
+
+async function kvSet(key: string, value: unknown): Promise<void> {
+  await supabase.from(TABLE).upsert({ key, value });
 }
 
 export const db = {
-  getContent: () => api<object>("/content"),
-  putContent: (data: object) => api<{ ok: boolean }>("/content", "PUT", data),
-  getUsers: () => api<unknown[]>("/users"),
-  putUsers: (data: unknown[]) => api<{ ok: boolean }>("/users", "PUT", data),
-  getStaff: () => api<unknown[]>("/staff"),
-  putStaff: (data: unknown[]) => api<{ ok: boolean }>("/staff", "PUT", data),
-  getAuthHashes: () => api<object>("/auth-hashes"),
-  putAuthHashes: (data: object) => api<{ ok: boolean }>("/auth-hashes", "PUT", data),
+  getContent: () => kvGet("site_content"),
+  putContent: (data: unknown) => kvSet("site_content", data),
+  getUsers: () => kvGet("users"),
+  putUsers: (data: unknown) => kvSet("users", data),
+  getStaff: () => kvGet("staff"),
+  putStaff: (data: unknown) => kvSet("staff", data),
+  getAuthHashes: () => kvGet("auth_hashes"),
+  putAuthHashes: (data: unknown) => kvSet("auth_hashes", data),
 };
