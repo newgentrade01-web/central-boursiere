@@ -1,11 +1,18 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import WalletModal from "../components/WalletModal";
-import { loadContent, saveContent } from "../lib/content";
-import type { UserAccount } from "../lib/content";
+import { auth, profiles } from "../lib/supabaseClient";
+import type { UserProfile } from "../lib/supabaseClient";
 
 const COUNTRIES = ["France", "Belgique", "Suisse", "Canada", "Espagne", "Italie", "Allemagne", "Royaume-Uni", "Maroc", "Tunisie", "Sénégal", "Côte d'Ivoire", "Cameroun", "Portugal", "Pays-Bas", "Autre"];
 const CASE_TYPES = ["Recouvrement de fonds crypto", "Obtention d'une licence boursière", "Trading & accès marchés", "Investissement & gestion d'actifs", "Compliance & audit réglementaire"];
+
+const FLAG_MAP: Record<string, string> = {
+  "France": "🇫🇷", "Belgique": "🇧🇪", "Suisse": "🇨🇭", "Canada": "🇨🇦",
+  "Espagne": "🇪🇸", "Italie": "🇮🇹", "Allemagne": "🇩🇪", "Royaume-Uni": "🇬🇧",
+  "Maroc": "🇲🇦", "Tunisie": "🇹🇳", "Sénégal": "🇸🇳", "Côte d'Ivoire": "🇨🇮",
+  "Cameroun": "🇨🇲", "Portugal": "🇵🇹", "Pays-Bas": "🇳🇱", "Autre": "🌍",
+};
 
 interface FormData {
   firstName: string;
@@ -24,6 +31,7 @@ export default function Register() {
   const [showWallet, setShowWallet] = useState(false);
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState<FormData>({
     firstName: "", lastName: "", country: "", password: "",
     phone: "", email: "", caseType: "", wallet: "",
@@ -36,61 +44,65 @@ export default function Register() {
 
   const handleSubmit = async () => {
     setSaving(true);
-    const content = loadContent();
-    const now = new Date();
-    const dateStr = now.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+    setError("");
+    try {
+      const { data, error: signUpError } = await auth.signUp(form.email, form.password);
+      if (signUpError) {
+        setError(
+          signUpError.message.includes("already registered")
+            ? "Cet email est déjà utilisé. Connectez-vous à la place."
+            : signUpError.message
+        );
+        setSaving(false);
+        return;
+      }
+      const userId = data.user?.id;
+      if (!userId) {
+        setError("Erreur lors de la création du compte. Réessayez.");
+        setSaving(false);
+        return;
+      }
 
-    const flagMap: Record<string, string> = {
-      "France": "🇫🇷", "Belgique": "🇧🇪", "Suisse": "🇨🇭", "Canada": "🇨🇦",
-      "Espagne": "🇪🇸", "Italie": "🇮🇹", "Allemagne": "🇩🇪", "Royaume-Uni": "🇬🇧",
-      "Maroc": "🇲🇦", "Tunisie": "🇹🇳", "Sénégal": "🇸🇳", "Côte d'Ivoire": "🇨🇮",
-      "Cameroun": "🇨🇲", "Portugal": "🇵🇹", "Pays-Bas": "🇳🇱", "Autre": "🌍",
-    };
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+      const countryCode = (form.country || "XX").slice(0, 2).toUpperCase();
+      const num = String(Math.floor(100000 + Math.random() * 900000));
 
-    const countryCode = (form.country || "XX").slice(0, 2).toUpperCase();
-    const num = String(Math.floor(100000 + Math.random() * 900000));
-    const seq = String(content.users.length + 1).padStart(3, "0");
-    const clientId = `CB-${countryCode}${num.slice(0, 3)}${seq}`;
-    const userId = `u_${Date.now()}`;
+      const newProfile: UserProfile = {
+        id: userId,
+        clientId: `CB-${countryCode}${num.slice(0, 6)}`,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        country: form.country || "Autre",
+        flag: FLAG_MAP[form.country] || "🌍",
+        plan: "Professionnel",
+        status: "pending",
+        kyc: "0",
+        joinDate: dateStr,
+        lastSeen: now.toISOString(),
+        balance: 0,
+        fundsAdded: 0,
+        fundsWithdrawn: 0,
+        pnl: 0,
+        caseStatus: "open",
+        caseAmount: 0,
+        caseRef: `${countryCode}-${now.getFullYear()}-${num.slice(0, 4)}`,
+        procedureStep: 1,
+        notes: `Type de dossier: ${form.caseType}. Inscription gratuite — paiement à l'activation.`,
+        comments: [],
+        assignedAdvisor: "",
+      };
 
-    const newUser: UserAccount = {
-      id: userId,
-      clientId,
-      firstName: form.firstName,
-      lastName: form.lastName,
-      email: form.email,
-      phone: form.phone,
-      country: form.country || "Autre",
-      flag: flagMap[form.country] || "🌍",
-      plan: "Professionnel",
-      status: "pending",
-      kyc: "0",
-      joinDate: dateStr,
-      lastSeen: "À l'instant",
-      balance: 0,
-      fundsAdded: 0,
-      fundsWithdrawn: 0,
-      pnl: 0,
-      caseStatus: "open",
-      caseAmount: 0,
-      caseRef: `${countryCode}-${now.getFullYear()}-${num.slice(0, 4)}`,
-      procedureStep: 1,
-      notes: `Type de dossier: ${form.caseType}. Inscription gratuite — paiement à l'activation.`,
-      comments: [],
-      assignedAdvisor: "",
-    };
-
-    // Save to content store + Supabase (await for persistence)
-    await saveContent({ ...content, users: [...content.users, newUser] });
-
-    // Store session for dashboard personalization
-    sessionStorage.setItem("cb_user_id", userId);
-    sessionStorage.setItem("cb_user_name", `${form.firstName} ${form.lastName}`);
-    sessionStorage.setItem("cb_user_email", form.email);
-
-    setSaving(false);
-    setSuccess(true);
-    setTimeout(() => navigate("/dashboard"), 2200);
+      await profiles.set(userId, newProfile);
+      setSaving(false);
+      setSuccess(true);
+      setTimeout(() => navigate("/dashboard"), 2200);
+    } catch {
+      setError("Une erreur est survenue. Veuillez réessayer.");
+      setSaving(false);
+    }
   };
 
   const inputClass = "w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all";
@@ -230,6 +242,12 @@ export default function Register() {
                 <p style={{ fontSize: 11, color: "#6b8a72", marginTop: 2 }}>Votre dossier sera ouvert immédiatement. Un conseiller vous contactera pour activer la procédure et discuter des options de paiement.</p>
               </div>
 
+              {error && (
+                <div className="rounded-xl px-4 py-3 text-sm" style={{ background: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.25)", color: "#f43f5e" }}>
+                  {error}
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <button className="btn-outline flex-1 py-3 rounded-xl text-sm" onClick={() => setStep(1)}>← Retour</button>
                 <button
@@ -238,9 +256,16 @@ export default function Register() {
                   style={{ opacity: (canNext2 && !saving) ? 1 : 0.5, cursor: (canNext2 && !saving) ? "pointer" : "not-allowed" }}
                   onClick={handleSubmit}
                 >
-                  {saving ? "Enregistrement…" : "Ouvrir mon Dossier →"}
+                  {saving ? "Création du compte…" : "Ouvrir mon Dossier →"}
                 </button>
               </div>
+
+              <p className="text-center text-xs" style={{ color: "#6b8a72" }}>
+                Déjà un compte ?{" "}
+                <Link to="/login" style={{ color: "#0B4D2E", fontWeight: 600, textDecoration: "underline" }}>
+                  Se connecter
+                </Link>
+              </p>
             </div>
           )}
         </div>
