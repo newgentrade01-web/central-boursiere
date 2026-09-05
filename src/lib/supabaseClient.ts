@@ -1,10 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { projectId, publicAnonKey } from "../../utils/supabase/info";
 
-export const supabase = createClient(
-  `https://${projectId}.supabase.co`,
-  publicAnonKey,
-);
+const key = "__cb_supabase__";
+declare global { interface Window { [key]: SupabaseClient } }
+
+export const supabase: SupabaseClient =
+  (window as Window & { [key]: SupabaseClient })[key] ??
+  (() => {
+    const client = createClient(`https://${projectId}.supabase.co`, publicAnonKey);
+    (window as Window & { [key]: SupabaseClient })[key] = client;
+    return client;
+  })();
 
 const TABLE = "kv_store_27283c63";
 
