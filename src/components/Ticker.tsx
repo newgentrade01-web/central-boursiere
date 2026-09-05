@@ -46,13 +46,7 @@ export default function Ticker({ partners }: { partners?: string[] }) {
       className="w-full overflow-hidden py-2.5 relative"
       style={{ background: "#0B4D2E", borderTop: "1px solid rgba(255,255,255,0.1)" }}
     >
-      <p
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-xs font-semibold"
-        style={{ color: "rgba(255,255,255,0.5)", fontFamily: "var(--font-mono)", letterSpacing: "0.08em" }}
-      >
-        LIVE
-      </p>
-      <div className="ticker-track flex gap-8 pl-16" style={{ width: "max-content" }}>
+      <div className="ticker-track flex gap-8 pl-4" style={{ width: "max-content" }}>
         {doubled.map((item, i) => (
           <span
             key={`${item.symbol}-${i}`}
