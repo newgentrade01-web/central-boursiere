@@ -118,7 +118,7 @@ export default function Licences() {
             <span style={{ color: "#0B4D2E" }}>Boursière Officielle</span>
           </h1>
           <p style={{ fontSize: 16, color: "#4a6b52", lineHeight: 1.7, marginBottom: 28 }}>
-            Central Boursière vous accompagne dans l'obtention des licences FCA, AMF, CySEC, FINRA et SEC. Délégation complète du processus, de la demande jusqu'à l'agrément officiel.
+            Centrale Boursière vous accompagne dans l'obtention des licences FCA, AMF, CySEC, FINRA et SEC. Délégation complète du processus, de la demande jusqu'à l'agrément officiel.
           </p>
           <Link to="/register" className="btn-primary px-6 py-3 rounded-xl inline-block text-base">
             Commencer ma procédure →
