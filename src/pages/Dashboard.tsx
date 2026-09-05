@@ -161,7 +161,7 @@ function TabOverview({ onNavigate, userProfile }: { onNavigate: (tab: string) =>
           <span style={{ fontSize: 22, flexShrink: 0 }}>📋</span>
           <div className="flex-1">
             <p style={{ fontWeight: 700, color: "#fff", fontSize: 14 }}>Dossier ouvert — En attente d'activation</p>
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>Un conseiller Central Boursière va prendre contact avec vous dans les 24h pour activer votre procédure. L'inscription est <strong style={{ color: P.emerald }}>gratuite</strong>.</p>
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>Un conseiller Centrale Boursière va prendre contact avec vous dans les 24h pour activer votre procédure. L'inscription est <strong style={{ color: P.emerald }}>gratuite</strong>.</p>
           </div>
           <button onClick={() => onNavigate("chat")} className="px-3 py-1.5 rounded-lg text-xs font-bold shrink-0" style={{ background: P.blue, color: "#fff" }}>
             Contacter →
@@ -934,7 +934,7 @@ function TabLegal() {
 function TabChat() {
   const [msg, setMsg] = useState("");
   const [messages, setMessages] = useState([
-    { from: "Support", time: "Just now", text: "Bonjour ! Je suis votre agent de support Central Boursière. Comment puis-je vous aider aujourd'hui ?" },
+    { from: "Support", time: "Just now", text: "Bonjour ! Je suis votre agent de support Centrale Boursière. Comment puis-je vous aider aujourd'hui ?" },
   ]);
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 200px)", minHeight: 400 }}>
