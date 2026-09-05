@@ -53,7 +53,7 @@ export default function Login() {
             Connexion à votre Espace
           </h1>
           <p style={{ fontSize: 13, color: "#6b8a72", marginTop: 4 }}>
-            Accédez à votre dashboard Central Boursière
+            Accédez à votre dashboard Centrale Boursière
           </p>
         </div>
 
