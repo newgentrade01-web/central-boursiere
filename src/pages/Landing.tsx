@@ -712,7 +712,7 @@ export default function Landing() {
         {/* Floating cards */}
         {floatCards.map((c) => (
           <Link to="/register" key={c.title}
-            className={`glass-card ${c.cls} absolute rounded-xl px-3 py-2.5 z-10 cursor-pointer hidden xl:block`}
+            className={`glass-card ${c.cls} absolute rounded-xl px-3 py-2.5 z-0 cursor-pointer hidden xl:block`}
             style={{ width: 170, border: `1px solid ${c.accent}28`, boxShadow: `0 4px 20px ${c.accent}12` }}>
             <div className="flex items-center gap-1.5 mb-1">
               <span style={{ fontSize: 14 }}>{c.icon}</span>
@@ -723,7 +723,7 @@ export default function Landing() {
           </Link>
         ))}
 
-        <div className="relative z-10 max-w-4xl mx-auto fade-in-up">
+        <div className="relative z-20 max-w-4xl mx-auto fade-in-up">
           {/* Logo + badge */}
           <div className="flex items-center justify-center gap-3 mb-6">
             {C.branding.logoUrl
