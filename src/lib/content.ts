@@ -296,8 +296,8 @@ export const DEFAULT_CONTENT: SiteContent = {
   floatCards: [
     { icon: "✅", title: "Dossier Récupéré", val: "$48,200 USDT", sub: "14 jours · FR-2026-0391", accent: "#10C96A" },
     { icon: "📋", title: "Licence FCA", val: "#FR-2026-0847", sub: "Active · Royaume-Uni", accent: "#60A5FA" },
-    { icon: "₿", title: "BTC Live", val: "$67,420", sub: "▲ 2.34%", accent: "#F59E0B" },
-    { icon: "🛡️", title: "Assurance Lloyd's", val: "$10M Max", sub: "Lloyd's · Couverture 100%", accent: "#A78BFA" },
+    { icon: "₿", title: "BTC", val: "$67,420", sub: "▲ 2.34%", accent: "#F59E0B" },
+    { icon: "📊", title: "Dossiers Traités", val: "12,400+", sub: "47 pays · 98.6%", accent: "#A78BFA" },
   ],
   users: DEFAULT_USERS,
   staff: DEFAULT_STAFF,
