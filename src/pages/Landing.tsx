@@ -362,92 +362,63 @@ function CrossSection() {
           <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Centrale Boursière est connectée aux principaux régulateurs, exchanges et assureurs mondiaux</p>
         </div>
 
-        {/* Cross structure */}
-        <div className="relative flex flex-col items-center" style={{ minHeight: 360 }}>
-          {/* Top logos */}
-          <div className={`flex gap-3 justify-center mb-4 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"}`}>
-            <LogoNode name="FCA" flag="🇬🇧" color="#60A5FA" size={48} />
+        {/* Scattered network — logos spread across banner, clear of centre */}
+        <div className="relative w-full" style={{ minHeight: 320 }}>
+
+          {/* ── Left column ── */}
+          <div className={`absolute left-0 top-4 flex flex-col gap-5 transition-all duration-700 ${visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}>
+            <LogoNode name="FCA" flag="🇬🇧" color="#60A5FA" size={52} />
             <LogoNode name="AMF" flag="🇫🇷" color="#EF4444" size={48} />
+            <LogoNode name="CySEC" flag="🇨🇾" color="#10C96A" size={44} />
           </div>
 
-          {/* Vertical arm top */}
-          <div className="w-px" style={{ height: visible ? 32 : 0, background: "linear-gradient(to bottom, rgba(16,201,106,0.4), rgba(16,201,106,0.8))", transition: "height 0.5s ease 0.2s" }} />
+          {/* ── Left-centre column ── */}
+          <div className={`absolute left-[14%] top-12 hidden sm:flex flex-col gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`} style={{ transitionDelay: "0.15s" }}>
+            <LogoNode name="Interpol" flag="🌐" color="#EF4444" size={46} />
+            <LogoNode name="Lloyd's" flag="🛡️" color="#8B5CF6" size={44} />
+          </div>
 
-          {/* Horizontal row — overflow-safe on mobile */}
-          <div className="flex items-center gap-0 w-full max-w-xl">
-            {/* Left logos */}
-            <div className={`hidden sm:flex gap-2 flex-1 justify-end pr-3 transition-all duration-700 ${visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`} style={{ transitionDelay: "0.3s" }}>
-              <LogoNode name="Lloyd's" flag="🛡️" color="#8B5CF6" size={48} />
-              <LogoNode name="Interpol" flag="🌐" color="#EF4444" size={48} />
-            </div>
+          {/* ── Right-centre column ── */}
+          <div className={`absolute right-[14%] top-12 hidden sm:flex flex-col gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`} style={{ transitionDelay: "0.2s" }}>
+            <LogoNode name="Bloomberg" flag="🖥️" color="#F59E0B" size={46} />
+            <LogoNode name="Binance" flag="₿" color="#F59E0B" size={44} />
+          </div>
 
-            {/* Horizontal arm left */}
-            <div className="hidden sm:block" style={{ width: visible ? 32 : 0, height: 1, background: "linear-gradient(to right, rgba(16,201,106,0.4), rgba(16,201,106,0.9))", transition: "width 0.4s ease 0.15s", flexShrink: 0 }} />
+          {/* ── Right column ── */}
+          <div className={`absolute right-0 top-4 flex flex-col gap-5 transition-all duration-700 ${visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`} style={{ transitionDelay: "0.1s" }}>
+            <LogoNode name="FINRA" flag="🇺🇸" color="#EF4444" size={52} />
+            <LogoNode name="Nasdaq" flag="📊" color="#60A5FA" size={48} />
+            <LogoNode name="NYSE" flag="🏛️" color="#60A5FA" size={44} />
+          </div>
 
-            {/* CENTER */}
-            <Link to="/register" className="flex-shrink-0">
+          {/* ── Bottom spread ── */}
+          <div className={`absolute bottom-0 left-0 right-0 flex justify-between px-[6%] transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`} style={{ transitionDelay: "0.35s" }}>
+            <LogoNode name="Kraken" flag="🐙" color="#8B5CF6" size={44} />
+            <LogoNode name="Coinbase" flag="🔵" color="#60A5FA" size={44} />
+            <LogoNode name="SEC" flag="🇺🇸" color="#10C96A" size={44} />
+            <LogoNode name="Kraken" flag="🐙" color="#8B5CF6" size={0} />
+          </div>
+
+          {/* ── Centre — logo only, no crowding ── */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Link to="/register" className="pointer-events-auto">
               <div
                 className="flex flex-col items-center justify-center rounded-3xl cursor-pointer"
                 style={{
-                  width: 90,
-                  height: 90,
+                  width: 80, height: 80,
                   background: "linear-gradient(135deg, #10C96A, #0B4D2E)",
-                  boxShadow: visible ? "0 0 60px rgba(16,201,106,0.4), 0 0 120px rgba(16,201,106,0.15)" : "none",
+                  boxShadow: visible ? "0 0 50px rgba(16,201,106,0.35)" : "none",
                   transition: "box-shadow 0.8s ease 0.4s",
                   border: "2px solid rgba(16,201,106,0.5)",
                 }}
               >
-                <CentralLogo size={56} darkBg={true} showRing={false} />
+                <CentralLogo size={50} darkBg={true} showRing={false} />
               </div>
             </Link>
-
-            {/* Horizontal arm right */}
-            <div className="hidden sm:block" style={{ width: visible ? 32 : 0, height: 1, background: "linear-gradient(to left, rgba(16,201,106,0.4), rgba(16,201,106,0.9))", transition: "width 0.4s ease 0.15s", flexShrink: 0 }} />
-
-            {/* Right logos */}
-            <div className={`hidden sm:flex gap-2 flex-1 pl-3 transition-all duration-700 ${visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`} style={{ transitionDelay: "0.3s" }}>
-              <LogoNode name="Bloomberg" flag="🖥️" color="#F59E0B" size={48} />
-              <LogoNode name="Nasdaq" flag="📊" color="#60A5FA" size={48} />
-            </div>
           </div>
-
-          {/* Mobile side logos — shown only on mobile below center */}
-          <div className="flex sm:hidden gap-3 mt-3">
-            <LogoNode name="Lloyd's" flag="🛡️" color="#8B5CF6" size={44} />
-            <LogoNode name="Interpol" flag="🌐" color="#EF4444" size={44} />
-            <LogoNode name="Bloomberg" flag="🖥️" color="#F59E0B" size={44} />
-            <LogoNode name="Nasdaq" flag="📊" color="#60A5FA" size={44} />
-          </div>
-
-          {/* Vertical arm bottom */}
-          <div style={{ width: 1, height: visible ? 32 : 0, background: "linear-gradient(to top, rgba(16,201,106,0.4), rgba(16,201,106,0.8))", transition: "height 0.5s ease 0.2s" }} />
-
-          {/* Bottom logos */}
-          <div className={`flex gap-3 justify-center mt-4 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`} style={{ transitionDelay: "0.5s" }}>
-            <LogoNode name="Binance" flag="₿" color="#F59E0B" size={48} />
-            <LogoNode name="Coinbase" flag="🔵" color="#60A5FA" size={48} />
-          </div>
-
-          {/* Corner logos — only on lg+ to avoid overflow */}
-          {visible && (
-            <div className="hidden lg:contents">
-              <div className="absolute top-0 left-0" style={{ animation: "bounce-in 0.5s ease 0.6s both" }}>
-                <LogoNode name="CySEC" flag="🇨🇾" color="#10C96A" size={44} />
-              </div>
-              <div className="absolute top-0 right-0" style={{ animation: "bounce-in 0.5s ease 0.7s both" }}>
-                <LogoNode name="FINRA" flag="🇺🇸" color="#EF4444" size={44} />
-              </div>
-              <div className="absolute bottom-0 left-0" style={{ animation: "bounce-in 0.5s ease 0.8s both" }}>
-                <LogoNode name="Kraken" flag="🐙" color="#8B5CF6" size={44} />
-              </div>
-              <div className="absolute bottom-0 right-0" style={{ animation: "bounce-in 0.5s ease 0.9s both" }}>
-                <LogoNode name="NYSE" flag="🏛️" color="#60A5FA" size={44} />
-              </div>
-            </div>
-          )}
         </div>
 
-        <p className="text-center mt-8 text-xs" style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.08em" }}>
+        <p className="text-center mt-6 text-xs" style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.08em" }}>
           CLIQUEZ SUR N'IMPORTE QUEL PARTENAIRE POUR OUVRIR UN DOSSIER
         </p>
       </div>
