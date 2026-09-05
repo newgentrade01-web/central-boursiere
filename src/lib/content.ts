@@ -290,7 +290,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     logoUrl: "",
     primaryColor: "#0A0F1C",
     accentColor: "#10C96A",
-    navbarTitle: "CENTRAL",
+    navbarTitle: "CENTRALE",
     navbarSubtitle: "BOURSIÈRE",
   },
   floatCards: [
