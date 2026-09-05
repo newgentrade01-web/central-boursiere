@@ -1,4 +1,4 @@
-// ── Central Boursière · Content Store ────────────────────────────────────────
+// ── Centrale Boursière · Content Store ────────────────────────────────────────
 
 export interface UserComment {
   id: string;
@@ -252,18 +252,18 @@ export const DEFAULT_CONTENT: SiteContent = {
   ],
   partners: ["FCA", "AMF", "SEC", "FINRA", "CySEC", "MiFID II", "ISO 27001", "TrustPilot", "Binance", "Coinbase", "Kraken", "NYSE", "Nasdaq", "CME Group", "Bloomberg", "Reuters", "Lloyd's of London"],
   company: {
-    name: "Central Boursière",
+    name: "Centrale Boursière",
     tagline: "Plateforme réglementée FCA pour le recouvrement de fonds crypto, les licences boursières et la gestion d'actifs institutionnels.",
     email_contact: "contact@centralboursiere.com",
     email_legal: "legal@centralboursiere.com",
     email_recovery: "recovery@centralboursiere.com",
-    disclaimer: "Central Boursière est une plateforme réglementée fournissant des services de recouvrement d'actifs, de conformité réglementaire et d'accès aux marchés financiers. Les performances passées ne garantissent pas les résultats futurs.",
+    disclaimer: "Centrale Boursière est une plateforme réglementée fournissant des services de recouvrement d'actifs, de conformité réglementaire et d'accès aux marchés financiers. Les performances passées ne garantissent pas les résultats futurs.",
     fca_number: "FR-2026-0847",
     trustpilot_score: "4.8",
     trustpilot_count: "2,847",
   },
   companyStructure: {
-    legalName: "Central Boursière SAS",
+    legalName: "Centrale Boursière SAS",
     legalForm: "Société par Actions Simplifiée",
     siret: "882 345 678 00012",
     capital: "500,000 €",
