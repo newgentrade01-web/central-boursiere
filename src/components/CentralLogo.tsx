@@ -33,7 +33,7 @@ export default function CentralLogo({ size = 36, darkBg = false, className = "",
     >
       <img
         src={centralPng}
-        alt="Central Boursière"
+        alt="Centrale Boursière"
         style={{
           width: size * 0.88,
           height: size * 0.88,
