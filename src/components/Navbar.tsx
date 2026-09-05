@@ -38,7 +38,7 @@ export default function Navbar({ walletAddress, onWalletConnect }: NavbarProps) 
               : <CentralLogo size={38} darkBg={false} />
             }
             <div>
-              <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "#0A0F1C", letterSpacing: "-0.01em" }}>{branding.navbarTitle || "CENTRAL"}</span>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "#0A0F1C", letterSpacing: "-0.01em" }}>{branding.navbarTitle || "CENTRALE"}</span>
               <span style={{ fontFamily: "var(--font-body)", fontWeight: 400, fontSize: 9, color: "#6b8a72", display: "block", letterSpacing: "0.14em", marginTop: -3 }}>{branding.navbarSubtitle || "BOURSIÈRE"}</span>
             </div>
           </Link>
