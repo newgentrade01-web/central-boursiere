@@ -680,19 +680,6 @@ export default function Landing() {
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 55% at 50% 35%, rgba(16,201,106,0.06) 0%, transparent 70%)" }} />
         <div className="scan-line absolute left-0 right-0 h-px pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(16,201,106,0.4), transparent)" }} />
 
-        {/* Floating cards */}
-        {floatCards.map((c) => (
-          <Link to="/register" key={c.title}
-            className={`glass-card ${c.cls} absolute rounded-xl px-3 py-2.5 z-0 cursor-pointer hidden xl:block`}
-            style={{ width: 170, border: `1px solid ${c.accent}28`, boxShadow: `0 4px 20px ${c.accent}12` }}>
-            <div className="flex items-center gap-1.5 mb-1">
-              <span style={{ fontSize: 14 }}>{c.icon}</span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: "#6b8a72", textTransform: "uppercase", letterSpacing: "0.05em" }}>{c.title}</span>
-            </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: "#0A0F1C" }}>{c.val}</div>
-            <div style={{ fontSize: 9, color: c.accent, marginTop: 1, fontWeight: 600 }}>{c.sub}</div>
-          </Link>
-        ))}
 
         <div className="relative z-20 max-w-4xl mx-auto fade-in-up">
           {/* Logo + badge */}
