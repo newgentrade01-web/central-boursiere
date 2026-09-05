@@ -1,4 +1,4 @@
-// ── Central Boursière · Admin Panel ──────────────────────────────────────────
+// ── Centrale Boursière · Admin Panel ──────────────────────────────────────────
 // Role-based access: "admin" (standard) | "super_admin" (hidden elevated mode)
 // Super-admin mode unlocked by using the elevated password — no UI hint.
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -1378,7 +1378,7 @@ function LoginScreen({ onLogin }: { onLogin: (role: Role) => void }) {
             🔐
           </button>
           <h1 className="text-xl font-bold" style={{ color: C.text }}>Panneau d&apos;Administration</h1>
-          <p className="text-xs mt-1" style={{ color: C.subtle }}>Central Boursière · Accès restreint</p>
+          <p className="text-xs mt-1" style={{ color: C.subtle }}>Centrale Boursière · Accès restreint</p>
           {showHint && (
             <p className="text-xs mt-2 px-3 py-1.5 rounded-lg inline-block" style={{ background: `${C.violet}18`, color: C.violet }}>
               Mode avancé disponible via ce formulaire
@@ -1534,7 +1534,7 @@ export default function Admin() {
             <div className="text-xs font-bold" style={{ color: isSA ? C.violet : C.green }}>
               {isSA ? "SUPER ADMIN" : "ADMIN"}
             </div>
-            <div className="text-xs" style={{ color: C.subtle }}>Central Boursière</div>
+            <div className="text-xs" style={{ color: C.subtle }}>Centrale Boursière</div>
           </div>
         </div>
       </div>
