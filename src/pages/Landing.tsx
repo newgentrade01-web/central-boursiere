@@ -359,7 +359,7 @@ function CrossSection() {
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px,3.5vw,40px)", fontWeight: 700, color: "#fff", marginBottom: 8 }}>
             Un Réseau d'Autorité Mondial
           </h2>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Central Boursière est connectée aux principaux régulateurs, exchanges et assureurs mondiaux</p>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Centrale Boursière est connectée aux principaux régulateurs, exchanges et assureurs mondiaux</p>
         </div>
 
         {/* Cross structure */}
@@ -844,7 +844,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px,3.5vw,40px)", fontWeight: 700, color: "#0A0F1C" }}>
-              Pourquoi Central Boursière
+              Pourquoi Centrale Boursière
             </h2>
           </div>
           {[
@@ -852,14 +852,14 @@ export default function Landing() {
               Illus: IllustrationForensics,
               tag: "Recouvrement Crypto", tagColor: "#10C96A",
               title: "Leader du Recouvrement Crypto en 2026",
-              body: "En 2025, plus de $14 milliards ont été volés dans des escroqueries crypto — +38% vs 2024. Central Boursière s'est spécialisé dans la blockchain forensics : analyse on-chain, identification des wallets frauduleux, coordination avec les exchanges et les régulateurs FCA, AMF, SEC et Interpol. 12,400+ dossiers traités dans 47 pays, délai moyen de recouvrement inférieur à 30 jours.",
+              body: "En 2025, plus de $14 milliards ont été volés dans des escroqueries crypto — +38% vs 2024. Centrale Boursière s'est spécialisé dans la blockchain forensics : analyse on-chain, identification des wallets frauduleux, coordination avec les exchanges et les régulateurs FCA, AMF, SEC et Interpol. 12,400+ dossiers traités dans 47 pays, délai moyen de recouvrement inférieur à 30 jours.",
               stat: "$890M+ récupérés",
             },
             {
               Illus: IllustrationLegal,
               tag: "Licences Réglementaires", tagColor: "#3B82F6",
               title: "L'Accès aux Marchés par les Licences",
-              body: "Toute activité boursière professionnelle requiert une licence réglementaire. En Europe, la directive MiFID II est incontournable. Au Royaume-Uni, la FCA. En France, l'AMF. Central Boursière vous accompagne dans l'intégralité du processus : analyse de votre profil, sélection de la juridiction optimale, préparation du dossier, dépôt et suivi. Délais moyens : 6 semaines FCA, 8 semaines AMF, 10 semaines CySEC.",
+              body: "Toute activité boursière professionnelle requiert une licence réglementaire. En Europe, la directive MiFID II est incontournable. Au Royaume-Uni, la FCA. En France, l'AMF. Centrale Boursière vous accompagne dans l'intégralité du processus : analyse de votre profil, sélection de la juridiction optimale, préparation du dossier, dépôt et suivi. Délais moyens : 6 semaines FCA, 8 semaines AMF, 10 semaines CySEC.",
               stat: "47+ Licences délivrées",
             },
             {
