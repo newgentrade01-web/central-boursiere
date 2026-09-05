@@ -1,4 +1,4 @@
-// ── Central Boursière · Auth Layer ───────────────────────────────────────────
+// ── Centrale Boursière · Auth Layer ───────────────────────────────────────────
 // Client-side auth: FNV-1a hashing + salt, rate limiting, session tokens.
 // This module never stores plaintext passwords anywhere.
 
