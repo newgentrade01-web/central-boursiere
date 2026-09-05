@@ -1283,7 +1283,7 @@ export default function Dashboard() {
         <div className="px-4 py-5 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <CentralLogo size={36} darkBg={true} />
           <div>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, color: "#fff", letterSpacing: "-0.01em" }}>CENTRAL</p>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, color: "#fff", letterSpacing: "-0.01em" }}>CENTRALE</p>
             <p style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em" }}>BOURSIÈRE · DASHBOARD</p>
           </div>
         </div>
